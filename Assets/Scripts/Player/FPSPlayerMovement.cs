@@ -3,7 +3,11 @@ using UnityEngine;
 public class FPSPlayerMovement : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 5.0f;
+    [SerializeField] private float gravity = -9.81f;
+    [SerializeField] private float jumpHeight = 1.5f;
+
     private CharacterController controller;
+    private float verticalVelocity;
 
     private void Awake()
     {
@@ -21,7 +25,20 @@ public class FPSPlayerMovement : MonoBehaviour
 
         Vector3 worldDirection = transform.TransformDirection(localDirection);
 
-        Vector3 displacement = worldDirection * moveSpeed * Time.deltaTime;
+        bool grounded = controller.isGrounded;
+        if(grounded == true && verticalVelocity < 0.0f)
+        {
+            verticalVelocity = -2.0f;
+        }
+
+        if(grounded == true && Input.GetKeyDown(KeyCode.Space) == true)
+        {
+            verticalVelocity = Mathf.Sqrt(jumpHeight * -2.0f * gravity);
+        }
+
+        verticalVelocity += gravity * Time.deltaTime;
+
+        Vector3 displacement = ((worldDirection * moveSpeed) + (Vector3.up * verticalVelocity)) * Time.deltaTime;
 
         controller.Move(displacement);
     }
